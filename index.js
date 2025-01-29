@@ -1,35 +1,32 @@
-require("dotenv").config();
 const express = require("express");
 const nodemailer = require("nodemailer");
 const cors = require("cors");
 
 const app = express();
 app.use(cors());
-app.use(express.json()); // Permite recibir datos en formato JSON
+app.use(express.json()); // Para procesar JSON en las solicitudes
 
-// Configurar transporte SMTP (usando Gmail)
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER, // Tu correo
-    pass: process.env.EMAIL_PASS, // Contraseña de aplicación de Gmail
-  },
-});
-
-// Ruta para recibir datos del formulario y enviar el correo
+// Endpoint para enviar correos
 app.post("/send-email", async (req, res) => {
   const { nombre, email, mensaje } = req.body;
 
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
   const mailOptions = {
     from: email,
-    to: "gastondangelo12@gmail.com", // Tu correo donde recibirás los mensajes
+    to: "gastondangelo12@gmail.com",
     subject: `Nuevo mensaje de ${nombre}`,
     text: `De: ${nombre}\nCorreo: ${email}\n\nMensaje:\n${mensaje}`,
   };
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log("Correo enviado correctamente");
     res.status(200).send("Correo enviado correctamente");
   } catch (error) {
     console.error("Error al enviar el correo:", error);
@@ -37,6 +34,6 @@ app.post("/send-email", async (req, res) => {
   }
 });
 
-// Iniciar el servidor
-const PORT = process.env.PORT || 5000;
+// Inicia el servidor en producción
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
